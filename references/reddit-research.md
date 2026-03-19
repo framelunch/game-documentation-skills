@@ -86,6 +86,24 @@ Phrases that signal revenue opportunity for fair-priced alternatives:
 
 These signal that players will pay a fair one-time price or support ethical IAP.
 
+## Keyword Selection Tips
+
+The `--keywords` flag does simple substring matching on title + body text. Short or
+generic words cause false positives (e.g. `nature` matches "by its very nature",
+`survival` matches "survival of the fittest" in non-game contexts).
+
+Prefer **compound or specific terms** over bare single words:
+
+| Instead of | Use |
+|-----------|-----|
+| `animal` | `animal game`, `wildlife sim` |
+| `nature` | `nature game`, `outdoor adventure` |
+| `survival` | `survival game`, `survival sim` |
+| `cozy` | `cozy game` |
+
+When the game concept is very specific (e.g. "animal parenting"), use genre terms
+that players actually type, not descriptive adjectives.
+
 ## Notes on Data Limitations
 
 - Reddit's public API returns ~25 top posts per subreddit (sorted by score)

@@ -43,8 +43,8 @@ ALGOLIA_BASE = "https://hn.algolia.com/api/v1/search"
 # Title must contain at least one to confirm game relevance
 GAME_RELATED_KEYWORDS = [
     "game", "gaming", "indie", "steam", "mobile game", "puzzle", "roguelike",
-    "rpg", "cozy", "idle", "browser game", "gamedev", "game dev", "unity",
-    "godot", "unreal", "playthrough", "player", "gameplay",
+    "rpg", "cozy game", "idle game", "browser game", "gamedev", "game dev",
+    "unity", "godot", "unreal", "playthrough", "gameplay",
 ]
 
 # Signals that this post discusses revenue / business outcomes
@@ -54,15 +54,30 @@ BUSINESS_KEYWORDS = [
 ]
 
 
+# Phrases that contain game-related words but are NOT about video/mobile games
+NOT_GAME_PHRASES = [
+    "game-theoretic", "game theory", "game changer", "game plan",
+    "game changing", "fair game", "blame game",
+]
+
+
 def is_game_related(title: str) -> bool:
     title_lower = title.lower()
+    if any(phrase in title_lower for phrase in NOT_GAME_PHRASES):
+        return False
     return any(kw in title_lower for kw in GAME_RELATED_KEYWORDS)
 
 
 def is_business_relevant(title: str, story_text: str = "") -> bool:
-    """True if the post discusses game revenue or business outcomes."""
+    """True if the post discusses game revenue or business outcomes.
+
+    Requires both a business keyword AND a game keyword to avoid false positives
+    from finance/SaaS posts that happen to use words like "revenue" or "launch".
+    """
     text = (title + " " + story_text).lower()
-    return any(kw in text for kw in BUSINESS_KEYWORDS)
+    has_business = any(kw in text for kw in BUSINESS_KEYWORDS)
+    has_game = any(kw in text for kw in GAME_RELATED_KEYWORDS)
+    return has_business and has_game
 
 
 def is_keyword_relevant(title: str, story_text: str, keywords: list[str]) -> bool:

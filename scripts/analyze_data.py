@@ -14,6 +14,7 @@ Outputs a markdown summary ready to be read by Claude for game idea synthesis.
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 
@@ -161,14 +162,27 @@ def main():
                         help="Path to HN JSON output")
     parser.add_argument("--game-overview", type=str, default="",
                         help="User's game concept description")
-    parser.add_argument("--output", type=str, default="/tmp/analysis_summary.md",
-                        help="Output markdown file path")
+    parser.add_argument("--output", type=str, default=None,
+                        help="Output markdown file path (default: auto-generated under reports/)")
+    parser.add_argument("--reports-dir", type=str, default="reports",
+                        help="Base directory for auto-generated report paths (default: reports/)")
     args = parser.parse_args()
 
     reddit = load_json(args.reddit)
     hn = load_json(args.hn)
 
     year = reddit.get("target_year") or hn.get("target_year") or datetime.now().year
+    now = datetime.now(timezone.utc)
+
+    # Auto-generate report path if not specified: reports/{year}/{YYYYMMDD}/{HHMMSS}.md
+    if args.output:
+        output_path = args.output
+    else:
+        date_str = now.strftime("%Y%m%d")
+        time_str = now.strftime("%H%M%S")
+        output_path = os.path.join(args.reports_dir, str(year), date_str, f"{time_str}.md")
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     sections = [
         render_header(args.game_overview or "(not provided)", year),
@@ -181,10 +195,10 @@ def main():
 
     output_content = "\n".join(sections)
 
-    with open(args.output, "w", encoding="utf-8") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(output_content)
 
-    print(f"Analysis summary saved to: {args.output}")
+    print(f"Analysis summary saved to: {output_path}")
     print(f"Reddit posts: {reddit.get('total_posts', 0)} | Pain points: {reddit.get('pain_point_posts_count', 0)}")
     print(f"HN posts: {hn.get('total_posts', 0)} | Show HN: {hn.get('show_hn_count', 0)}")
 

@@ -66,11 +66,11 @@ python scripts/fetch_hn.py \
 python scripts/analyze_data.py \
   --reddit /tmp/reddit_raw_{year}.json \
   --hn /tmp/hn_raw_{year}.json \
-  --game-overview "{game_overview}" \
-  --output /tmp/analysis_summary_{year}.md
+  --game-overview "{game_overview}"
 ```
 
-Read `/tmp/analysis_summary_{year}.md` before proceeding.
+`--output` を省略すると `reports/{year}/{YYYYMMDD}/{HHMMSS}.md` に自動保存される。
+出力されたパスを読み込む — これが以降の合成インプットになる。
 
 ## Step 4: Indie Hackers research (WebSearch)
 
@@ -82,6 +82,7 @@ Read `references/synthesis-criteria.md` to decide which gaps are worth proposing
 Read `references/monetization-strategies.md` for monetization options per idea.
 Read `references/marketing-strategies.md` for marketing channel selection.
 Read `references/evaluation-rubric.md` for the 5-axis scoring criteria.
+Read `references/mvp-scope.md` for MVP scope definition and timeline estimation.
 
 Produce 3–5 game idea proposals aligned with `{game_overview}`.
 
@@ -167,6 +168,21 @@ Use this structure:
 | Profitability | ⭐⭐⭐⭐☆ (4/5) | ... |
 | Competitive Advantage | ⭐⭐⭐☆☆ (3/5) | ... |
 | Small-Team Suitability | ⭐⭐⭐⭐⭐ (5/5) | ... |
+
+**MVP Scope:**
+- Core loop implemented: [one sentence]
+- Content included: [N levels / maps / encounters]
+- Features excluded from MVP: [bullet list]
+- "Done" condition: [player can do X, reach Y, feel Z]
+
+**MVP Development Timeline:**
+- Estimate: [N weeks / months]
+- Breakdown:
+  - Core mechanic: N weeks
+  - Art (placeholder / final): N weeks
+  - Audio: N days
+  - Platform submission + QA: N weeks
+- First milestone (playable internally): [N weeks from start]
 
 ---
 
