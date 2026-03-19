@@ -1,0 +1,12 @@
+# Temporary script output
+/tmp/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
