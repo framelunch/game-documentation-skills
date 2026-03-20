@@ -98,6 +98,34 @@ def render_reddit_section(reddit: dict, game_overview: str) -> str:
     return "\n".join(lines)
 
 
+def render_ih_section(ih: dict) -> str:
+    lines = []
+    period = ih.get("period", "?")
+    total_raw = ih.get("total_raw", 0)
+    total_relevant = ih.get("total_relevant", 0)
+
+    lines.append(f"## Indie Hackers Research Summary ({period})")
+    lines.append(f"- Raw posts fetched: {total_raw}")
+    lines.append(f"- Game-relevant posts: {total_relevant}")
+    lines.append("")
+
+    posts = ih.get("posts", [])[:15]
+    if posts:
+        lines.append("### Top Posts (by engagement)")
+        lines.append("")
+        for i, post in enumerate(posts, 1):
+            lines.append(f"{i}. **{post['title']}**")
+            lines.append(f"   - Replies: {post['num_replies']} | Views: {post['num_views']} | Engagement: {post['engagement_score']}")
+            lines.append(f"   - Group: {post.get('group', '—')} | Date: {post.get('created_at', '—')}")
+            lines.append(f"   - URL: {post['url']}")
+            if post.get("body_snippet", "").strip():
+                snippet = post["body_snippet"][:200].replace("\n", " ")
+                lines.append(f"   - Snippet: {snippet}...")
+            lines.append("")
+
+    return "\n".join(lines)
+
+
 def render_hn_section(hn: dict) -> str:
     lines = []
     year = hn.get("target_year", "?")
@@ -160,6 +188,8 @@ def main():
                         help="Path to Reddit JSON output")
     parser.add_argument("--hn", type=str, default="/tmp/hn_raw.json",
                         help="Path to HN JSON output")
+    parser.add_argument("--ih", type=str, default=None,
+                        help="Path to Indie Hackers JSON output (optional)")
     parser.add_argument("--game-overview", type=str, default="",
                         help="User's game concept description")
     parser.add_argument("--output", type=str, default=None,
@@ -170,9 +200,10 @@ def main():
 
     reddit = load_json(args.reddit)
     hn = load_json(args.hn)
+    ih = load_json(args.ih) if args.ih else {}
 
     year = reddit.get("target_year") or hn.get("target_year") or datetime.now().year
-    now = datetime.now(timezone.utc)
+    now = datetime.now()  # ローカル時刻でファイルパスを生成
 
     # Auto-generate report path if not specified: reports/{year}/{YYYYMMDD}/{HHMMSS}.md
     if args.output:
@@ -190,8 +221,12 @@ def main():
         "---\n",
         render_hn_section(hn),
         "---\n",
-        "## Next Steps\n\nRead this summary, then consult references/indiehackers-research.md for WebSearch queries to run on Indie Hackers.\nThen synthesize all findings into game idea proposals per the SKILL.md template.\n",
     ]
+    if ih:
+        sections += [render_ih_section(ih), "---\n"]
+    sections.append(
+        "## Next Steps\n\nRead this summary, then consult references/indiehackers-research.md for additional WebSearch queries.\nThen synthesize all findings into game idea proposals per the SKILL.md template.\n"
+    )
 
     output_content = "\n".join(sections)
 
@@ -201,6 +236,8 @@ def main():
     print(f"Analysis summary saved to: {output_path}")
     print(f"Reddit posts: {reddit.get('total_posts', 0)} | Pain points: {reddit.get('pain_point_posts_count', 0)}")
     print(f"HN posts: {hn.get('total_posts', 0)} | Show HN: {hn.get('show_hn_count', 0)}")
+    if ih:
+        print(f"IH posts: {ih.get('total_raw', 0)} raw | {ih.get('total_relevant', 0)} relevant")
 
 
 if __name__ == "__main__":

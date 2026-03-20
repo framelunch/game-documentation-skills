@@ -1,86 +1,87 @@
 # game-idea-researcher
 
-A Claude Code skill that researches niche indie game ideas based on real player demand,
-community trends, and proven indie business models.
+実際のプレイヤー需要・コミュニティトレンド・実績あるインディーゲームのビジネスモデルに基づいて、ニッチなインディーゲームアイデアをリサーチする Claude Code スキルです。
 
-## What it does
+## できること
 
-When invoked, the skill:
+スキルを呼び出すと、以下の処理を実行します。
 
-1. Asks you (in Japanese) for a target year and your game concept
-2. Fetches pain-point posts from Reddit game communities
-3. Fetches high-engagement game launches from Hacker News
-4. Searches Indie Hackers for revenue benchmarks and monetization strategies
-5. Synthesizes findings into 3–5 niche game idea proposals
-6. Saves a structured report to `reports/{year}/{YYYYMMDD}/{HHMMSS}.md`
+1. 対象年とゲームコンセプトを（日本語で）質問する
+2. Reddit のゲームコミュニティから不満・要望投稿を取得する
+3. Hacker News からエンゲージメントの高いゲームリリース情報を取得する
+4. Indie Hackers から収益ベンチマークと収益化戦略を検索する
+5. 調査結果を統合し、3〜5 件のニッチなゲームアイデア案を提示する
+6. 構造化レポートを `reports/{year}/{YYYYMMDD}/{HHMMSS}.md` に保存する
 
-Each proposal includes a monetization plan, marketing approach, and a 5-axis scorecard:
-Feasibility / Development Timeline / Profitability / Competitive Advantage / Small-Team Suitability.
+各提案には、収益化プラン・マーケティング方針・5 軸スコアカードが含まれます：
+実現可能性 / 開発期間 / 収益性 / 競合優位性 / 小規模チーム適性
 
-## Directory structure
+## ディレクトリ構成
 
 ```
 .
-├── SKILL.md                          # Skill definition: workflow steps only
+├── SKILL.md                          # スキル定義: ワークフロー手順のみ
 ├── scripts/
-│   ├── fetch_reddit.py               # Fetches posts from 16 game subreddits
-│   ├── fetch_hn.py                   # Fetches game posts via HN Algolia API
-│   ├── fetch_indiehackers.py         # Placeholder (IH research uses WebSearch)
-│   └── analyze_data.py               # Merges Reddit + HN output into a summary
+│   ├── fetch_reddit.py               # 16 個のゲーム系サブレディットから投稿を取得
+│   ├── fetch_hn.py                   # HN Algolia API 経由でゲーム投稿を取得
+│   ├── fetch_indiehackers.py         # プレースホルダー（IH 調査は WebSearch を使用）
+│   └── analyze_data.py               # Reddit + HN の出力をまとめてサマリーを生成
 ├── references/
-│   ├── reddit-research.md            # How to interpret Reddit data
-│   ├── hn-research.md                # How to interpret HN data
-│   ├── indiehackers-research.md      # WebSearch queries for Indie Hackers
-│   ├── synthesis-criteria.md         # What makes a gap worth proposing
-│   ├── monetization-strategies.md    # Monetization options by platform/audience
-│   ├── marketing-strategies.md       # Marketing channels by phase
-│   └── evaluation-rubric.md          # 5-axis scoring criteria (1–5 per axis)
-└── reports/                          # Generated reports (git-ignored)
+│   ├── reddit-research.md            # Reddit データの読み方
+│   ├── hn-research.md                # HN データの読み方
+│   ├── indiehackers-research.md      # Indie Hackers 向け WebSearch クエリ
+│   ├── synthesis-criteria.md         # 提案に値するギャップの判断基準
+│   ├── monetization-strategies.md    # プラットフォーム・対象読者別の収益化オプション
+│   ├── marketing-strategies.md       # フェーズ別マーケティングチャネル
+│   └── evaluation-rubric.md          # 5 軸スコアリング基準（各軸 1〜5 点）
+└── reports/                          # 生成レポート（git 管理外）
     └── {year}/{YYYYMMDD}/{HHMMSS}.md
 ```
 
-## Scripts
+## スクリプト
 
-All scripts use only Python standard library — no dependencies to install.
+すべてのスクリプトは Python 標準ライブラリのみを使用しており、追加インストールは不要です。
 
-| Script | Purpose | Key options |
-|--------|---------|-------------|
-| `fetch_reddit.py` | Fetch top posts from 16 game subreddits | `--year`, `--keywords`, `--limit` |
-| `fetch_hn.py` | Fetch game posts from HN via Algolia API | `--year`, `--keywords`, `--min-points` |
-| `analyze_data.py` | Merge Reddit + HN JSON into a markdown summary | `--reddit`, `--hn`, `--game-overview` |
+| スクリプト | 目的 | 主なオプション |
+|-----------|------|--------------|
+| `fetch_reddit.py` | 16 個のゲーム系サブレディットからトップ投稿を取得 | `--year`, `--keywords`, `--limit` |
+| `fetch_hn.py` | Algolia API 経由で HN のゲーム投稿を取得 | `--year`, `--keywords`, `--min-points` |
+| `fetch_indiehackers.py` | Firebase REST API 経由で Indie Hackers の投稿を取得 | `--year`, `--rolling`, `--limit`, `--min-replies` |
+| `analyze_data.py` | Reddit + HN + IH の JSON をマージしてマークダウンサマリーを生成 | `--reddit`, `--hn`, `--ih`, `--game-overview` |
 
-### Quick test
+### クイックテスト
 
 ```bash
-python scripts/fetch_hn.py --year 2025 --output /tmp/hn.json
 python scripts/fetch_reddit.py --year 2025 --output /tmp/reddit.json
-python scripts/analyze_data.py --reddit /tmp/reddit.json --hn /tmp/hn.json --output /tmp/summary.md
+python scripts/fetch_hn.py --year 2025 --output /tmp/hn.json
+python scripts/fetch_indiehackers.py --year 2025 --output /tmp/ih.json
+python scripts/analyze_data.py --reddit /tmp/reddit.json --hn /tmp/hn.json --ih /tmp/ih.json --output /tmp/summary.md
 ```
 
-## Data sources
+## データソース
 
-| Source | Access method | What it provides |
-|--------|--------------|-----------------|
-| Reddit | Public JSON API (no auth) | Player pain points, feature requests, monetization frustrations |
-| Hacker News | Algolia Search API (no auth) | Indie game launches, revenue discussions, technical approaches |
-| Indie Hackers | WebSearch (`site:indiehackers.com`) | Revenue benchmarks, monetization strategies, solo dev success stories |
+| ソース | アクセス方法 | 提供される情報 |
+|--------|------------|--------------|
+| Reddit | 公開 JSON API（認証不要） | プレイヤーの不満・機能要望・課金への不満 |
+| Hacker News | Algolia Search API（認証不要） | インディーゲームのリリース情報・収益議論・技術的アプローチ |
+| Indie Hackers | WebSearch（`site:indiehackers.com`） | 収益ベンチマーク・収益化戦略・個人開発者の成功事例 |
 
-## Output report structure
+## 出力レポート構成
 
 ```
 reports/{year}/{YYYYMMDD}/{HHMMSS}.md
-├── Original Prompt
-├── Game Overview
-├── Research Summary (Reddit / HN / Indie Hackers)
-├── Top Player Pain Points
-├── Game Idea Proposals (3–5 ideas)
-│   ├── Concept + Core Loop + Unique Angle
-│   ├── Evidence (with signal strength label)
-│   ├── Monetization plan
-│   ├── Marketing plan
-│   └── 5-axis Scorecard
-├── Monetization Strategy Overview
-├── Marketing Strategy Overview
-├── Competitive Landscape
-└── Recommended Next Steps
+├── 元のプロンプト
+├── ゲーム概要
+├── リサーチサマリー（Reddit / HN / Indie Hackers）
+├── プレイヤーの主要な不満点
+├── ゲームアイデア提案（3〜5 案）
+│   ├── コンセプト + コアループ + 独自の切り口
+│   ├── 根拠（シグナル強度ラベル付き）
+│   ├── 収益化プラン
+│   ├── マーケティングプラン
+│   └── 5 軸スコアカード
+├── 収益化戦略概要
+├── マーケティング戦略概要
+├── 競合状況
+└── 推奨する次のステップ
 ```
